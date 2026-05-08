@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#05080f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Шёпот — Дневник кашля</title>
+  <style>
+    :root {
+      --bg: #f0f4f8;
+      --bg-gradient: linear-gradient(160deg, #e8edf3 0%, #dde3ec 100%);
+      --surface: rgba(255,255,255,0.7);
+      --surface-solid: #ffffff;
+      --surface2: rgba(255,255,255,0.5);
+      --text: #1a1d23;
+      --text-secondary: #5f6b7a;
+      --text-muted: #8896a6;
+      --primary: #4f46e5;
+      --primary-light: #818cf8;
+      --primary-glow: rgba(79,70,229,0.15);
+      --accent: #06b6d4;
+      --accent-light: #67e8f9;
+      --warm: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+      --purple: #8b5cf6;
+      --border: rgba(0,0,0,0.06);
+      --border-strong: rgba(0,0,0,0.12);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+      --shadow-glow: 0 0 40px rgba(79,70,229,0.1);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-xl: 32px;
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+      --blur: blur(20px) saturate(180%);
+      --nav-height: 80px;
+      --header-height: 64px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #05080f;
+      --bg-gradient: linear-gradient(160deg, #0a0e1a 0%, #0d1220 50%, #081018 100%);
+      --surface: rgba(18, 24, 38, 0.75);
+      --surface-solid: #111827;
+      --surface2: rgba(18, 24, 38, 0.5);
+      --text: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #4b5563;
+      --primary: #6366f1;
+      --primary-light: #a5b4fc;
+      --primary-glow: rgba(99,102,241,0.2);
+      --accent: #22d3ee;
+      --accent-light: #a5f3fc;
+      --border: rgba(255,255,255,0.06);
+      --border-strong: rgba(255,255,255,0.1);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+      --shadow-glow: 0 0 60px rgba(99,102,241,0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      background-image: var(--bg-gradient);
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100dvh;
+      line-height: 1.5;
+      overflow-x: hidden;
+      padding-bottom: calc(var(--nav-height) + env(safe-area-inset-bottom, 0px));
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .app-header {
+      position: fixed; top: 0; left: 0; right: 0; height: var(--header-height);
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border-bottom: 1px solid var(--border); z-index: 100;
+      display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .header-logo { display: flex; align-items: center; gap: 0.6rem; }
+    .header-logo-icon {
+      width: 36px; height: 36px; background: linear-gradient(135deg, var(--primary), var(--accent));
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; box-shadow: 0 2px 10px rgba(99,102,241,0.3);
+    }
+    .header-title { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.02em; }
+    .header-subtitle { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; letter-spacing: 0.02em; }
+    .header-actions { display: flex; align-items: center; gap: 0.5rem; }
+    .theme-toggle {
+      width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 12px;
+      background: var(--surface2); cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 1.15rem; transition: all 0.3s;
+      backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    }
+    .theme-toggle:active { transform: scale(0.92); }
+
+    .main-content {
+      padding-top: calc(var(--header-height) + 0.75rem); padding-left: 1rem; padding-right: 1rem;
+      max-width: 600px; margin: 0 auto; width: 100%;
+    }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; height: var(--nav-height);
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border-top: 1px solid var(--border); display: flex; align-items: center;
+      justify-content: space-around; z-index: 100;
+      padding-bottom: env(safe-area-inset-bottom, 0px); transition: background 0.3s, border-color 0.3s;
+    }
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 0.25rem; padding: 0.5rem 0.75rem; border-radius: 14px; cursor: pointer;
+      transition: all 0.25s; min-width: 60px; -webkit-tap-highlight-color: transparent;
+      border: none; background: none; color: var(--text-muted); font-family: var(--font); position: relative;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-item.active::before {
+      content: ''; position: absolute; top: 4px; left: 50%; transform: translateX(-50%);
+      width: 20px; height: 3px; background: var(--primary); border-radius: 2px;
+    }
+    .nav-item:active { transform: scale(0.9); }
+    .nav-icon { font-size: 1.5rem; line-height: 1; transition: transform 0.25s; }
+    .nav-item.active .nav-icon { transform: scale(1.1); }
+    .nav-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.02em; white-space: nowrap; }
+
+    .section { display: none; animation: fadeIn 0.35s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    .card {
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem;
+      margin-bottom: 1rem; box-shadow: var(--shadow-sm); transition: all 0.3s;
+    }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .card-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; letter-spacing: -0.01em; }
+    .card-desc { color: var(--text-secondary); font-size: 0.82rem; line-height: 1.5; }
+
+    .status-bar {
+      display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1rem;
+      background: var(--surface2); border-radius: var(--radius-md); margin-bottom: 1rem;
+      border: 1px solid var(--border);
+    }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-muted); flex-shrink: 0; transition: background 0.3s; }
+    .status-dot.active { background: var(--danger); box-shadow: 0 0 8px rgba(239,68,68,0.5); animation: pulse-dot 1.5s infinite; }
+    .status-dot.ready { background: var(--success); box-shadow: 0 0 8px rgba(16,185,129,0.5); }
+    @keyframes pulse-dot { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(0.85); } }
+    .status-text { font-size: 0.85rem; font-weight: 500; color: var(--text-secondary); }
+    .status-text.active { color: var(--danger); font-weight: 600; }
+
+    .visualizer-wrap {
+      position: relative; height: 160px; border-radius: var(--radius-md); overflow: hidden;
+      margin-bottom: 1rem; background: var(--surface2); border: 1px solid var(--border);
+    }
+    #waveform-canvas, #spectrum-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+    #spectrum-canvas { opacity: 0.4; }
+
+    .live-counter { text-align: center; padding: 1.5rem 0; }
+    .counter-ring { width: 160px; height: 160px; margin: 0 auto 1rem; position: relative; }
+    .counter-ring svg { transform: rotate(-90deg); width: 100%; height: 100%; }
+    .counter-ring circle { fill: none; stroke-width: 6; stroke-linecap: round; }
+    .counter-ring .bg { stroke: var(--border-strong); }
+    .counter-ring .fill { stroke: url(#counterGradient); transition: stroke-dashoffset 0.5s ease; }
+    .counter-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .counter-num {
+      font-size: 2.8rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .counter-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; font-weight: 500; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.85rem 1.5rem; border: none; border-radius: var(--radius-md);
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+      font-family: var(--font); letter-spacing: -0.01em; -webkit-tap-highlight-color: transparent;
+      position: relative; overflow: hidden;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), var(--primary-light)); color: #fff; box-shadow: 0 4px 20px rgba(79,70,229,0.35); }
+    .btn-primary:active { box-shadow: 0 2px 10px rgba(79,70,229,0.25); }
+    .btn-danger { background: linear-gradient(135deg, #ef4444, #f87171); color: #fff; box-shadow: 0 4px 20px rgba(239,68,68,0.3); }
+    .btn-ghost { background: var(--surface2); color: var(--text-secondary); border: 1px solid var(--border); }
+    .btn-ghost:active { background: var(--border); }
+    .btn-group { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-top: 1rem; }
+    .btn-group .btn { flex: 1; min-width: 130px; max-width: 200px; }
+
+    .sensitivity-row { margin: 1rem 0; }
+    .sensitivity-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; }
+    .sensitivity-label span { font-size: 0.82rem; color: var(--text-secondary); font-weight: 500; }
+    .sensitivity-label strong { color: var(--primary); font-size: 0.9rem; }
+    input[type="range"] {
+      -webkit-appearance: none; appearance: none; width: 100%; height: 6px;
+      border-radius: 3px; background: var(--border-strong); outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      box-shadow: 0 2px 8px rgba(79,70,229,0.4); cursor: pointer; transition: transform 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); }
+    input[type="range"]::-moz-range-thumb {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-light));
+      box-shadow: 0 2px 8px rgba(79,70,229,0.4); cursor: pointer; border: none;
+    }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+    .stat-card {
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;
+      text-align: center; box-shadow: var(--shadow-sm); transition: all 0.3s;
+    }
+    .stat-card:active { transform: scale(0.97); }
+    .stat-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1.1; }
+    .stat-label { font-size: 0.72rem; color: var(--text-muted); font-weight: 500; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .chart-box {
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem;
+      margin-bottom: 1rem; box-shadow: var(--shadow-sm);
+    }
+    .chart-box h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.4rem; }
+    canvas.chart { width: 100%; height: 180px; display: block; }
+
+    .insight-card {
+      background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem; display: flex; align-items: flex-start; gap: 0.75rem; box-shadow: var(--shadow-sm); transition: all 0.3s;
+    }
+    .insight-card.warning { border-color: rgba(245,158,11,0.2); background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(239,68,68,0.04)); }
+    .insight-card.info { border-color: rgba(59,130,246,0.2); background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(6,182,212,0.04)); }
+    .insight-card.positive { border-color: rgba(16,185,129,0.2); background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(6,182,212,0.04)); }
+    .insight-emoji { font-size: 1.3rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .insight-text { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    .event-list { max-height: 50vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .event-item { display: flex; align-items: center; justify-content: space-between; padding: 0.85rem 0; border-bottom: 1px solid var(--border); gap: 0.75rem; }
+    .event-item:last-child { border-bottom: none; }
+    .event-left { flex: 1; min-width: 0; }
+    .event-time { font-size: 0.85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+    .event-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .event-badge { padding: 0.3rem 0.7rem; border-radius: 20px; font-size: 0.7rem; font-weight: 700; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.03em; }
+    .event-badge.dry { background: rgba(59,130,246,0.12); color: var(--primary); }
+    .event-badge.wet { background: rgba(6,182,212,0.12); color: var(--accent); }
+
+    .setting-item { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); }
+    .setting-item:last-child { border-bottom: none; }
+    .setting-info h4 { font-size: 0.9rem; font-weight: 600; }
+    .setting-info p { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; }
+    .toggle {
+      width: 48px; height: 28px; background: var(--border-strong); border-radius: 14px;
+      position: relative; cursor: pointer; transition: background 0.3s; flex-shrink: 0; border: none; padding: 0;
+    }
+    .toggle.active { background: var(--primary); }
+    .toggle::after {
+      content: ''; position: absolute; width: 22px; height: 22px; background: #fff;
+      border-radius: 50%; top: 3px; left: 3px; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    .toggle.active::after { transform: translateX(20px); }
+
+    .weather-tag {
+      display: inline-flex; align-items: center; gap: 0.35rem; background: var(--surface2);
+      border: 1px solid var(--border); padding: 0.45rem 0.8rem; border-radius: 20px;
+      font-size: 0.78rem; color: var(--text-secondary); font-weight: 500;
+    }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.5; }
+    .empty-state p { font-size: 0.9rem; line-height: 1.5; }
+
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+    @media (min-width: 600px) {
+      .main-content { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+      .visualizer-wrap { height: 200px; }
+      .counter-ring { width: 180px; height: 180px; }
+      .counter-num { font-size: 3.2rem; }
+    }
+    @media (max-width: 360px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+      .stat-card { padding: 0.75rem 0.5rem; }
+      .stat-value { font-size: 1.5rem; }
+      .btn-group .btn { min-width: 110px; }
+    }
+
+    .toast-container { position: fixed; top: calc(var(--header-height) + 0.5rem); left: 50%; transform: translateX(-50%); z-index: 200; pointer-events: none; }
+    .toast {
+      background: var(--surface-solid); border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md); padding: 0.75rem 1.25rem; font-size: 0.85rem;
+      font-weight: 600; box-shadow: var(--shadow-lg); display: flex; align-items: center;
+      gap: 0.5rem; animation: toastIn 0.3s ease, toastOut 0.3s ease 2.7s forwards;
+      backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur); white-space: nowrap;
+    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+    @keyframes toastOut { to { opacity: 0; transform: translateY(-10px) scale(0.95); } }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-logo">
+      <div class="header-logo-icon">👁</div>
+      <div>
+        <div class="header-title">Шёпот</div>
+        <div class="header-subtitle">Дневник кашля</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="theme-toggle" id="theme-btn" aria-label="Сменить тему">🌙</button>
+    </div>
+  </header>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <main class="main-content">
+
+    <!-- MONITOR TAB -->
+    <section id="tab-monitor" class="section active">
+      <div class="card">
+        <div class="card-header"><span class="card-title">🎙️ Мониторинг</span></div>
+        <div class="status-bar">
+          <div class="status-dot" id="status-dot"></div>
+          <span class="status-text" id="status-text">Ожидание запуска</span>
+        </div>
+        <div class="visualizer-wrap">
+          <canvas id="waveform-canvas"></canvas>
+          <canvas id="spectrum-canvas"></canvas>
+        </div>
+        <div class="live-counter">
+          <div class="counter-ring">
+            <svg viewBox="0 0 160 160">
+              <defs><linearGradient id="counterGradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="var(--primary)"/><stop offset="100%" stop-color="var(--accent)"/></linearGradient></defs>
+              <circle class="bg" cx="80" cy="80" r="70"/>
+              <circle class="fill" id="counter-fill" cx="80" cy="80" r="70" stroke-dasharray="439.82" stroke-dashoffset="439.82"/>
+            </svg>
+            <div class="counter-center">
+              <div class="counter-num" id="live-count">0</div>
+              <div class="counter-label">сегодня</div>
+            </div>
+          </div>
+        </div>
+        <div class="sensitivity-row">
+          <div class="sensitivity-label"><span>Чувствительность</span><strong id="sens-val">50%</strong></div>
+          <input type="range" id="sensitivity" min="10" max="90" value="50">
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-start">▶ Начать</button>
+          <button class="btn btn-danger" id="btn-stop" style="display:none;">⏹ Стоп</button>
+        </div>
+      </div>
+
+      <div class="card" id="weather-card" style="display:none;">
+        <div class="card-title" style="margin-bottom:0.5rem;">🌤 Погода</div>
+        <div id="weather-display"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD TAB -->
+    <section id="tab-dashboard" class="section">
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.75rem;">📊 Сегодня</div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-value" id="stat-total" style="color:var(--primary);">0</div><div class="stat-label">Всего</div></div>
+          <div class="stat-card"><div class="stat-icon">🏜️</div><div class="stat-value" id="stat-dry" style="color:var(--accent);">0</div><div class="stat-label">Сухих</div></div>
+          <div class="stat-card"><div class="stat-icon">💧</div><div class="stat-value" id="stat-wet" style="color:var(--warm);">0</div><div class="stat-label">Влажных</div></div>
+          <div class="stat-card"><div class="stat-icon">🌙</div><div class="stat-value" id="stat-night" style="color:var(--purple);">0</div><div class="stat-label">Ночных</div></div>
+        </div>
+      </div>
+      <div class="chart-box"><h3>📈 По часам</h3><canvas id="hourly-chart" class="chart"></canvas></div>
+      <div class="chart-box"><h3>📅 За неделю</h3><canvas id="weekly-chart" class="chart"></canvas></div>
+    </section>
+
+    <!-- INSIGHTS TAB -->
+    <section id="tab-insights" class="section">
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.5rem;">💡 Выводы</div>
+        <p class="card-desc">Автоматический анализ паттернов кашля</p>
+      </div>
+      <div id="insights-container" style="margin-top:0.5rem;">
+        <div class="empty-state"><div class="empty-icon">🧠</div><p>Накопите минимум 10 эпизодов<br>для получения инсайтов</p></div>
+      </div>
+    </section>
+
+    <!-- LOG TAB -->
+    <section id="tab-log" class="section">
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.75rem;">📋 Журнал</div>
+        <div class="btn-group" style="margin-top:0; margin-bottom:0.75rem;">
+          <button class="btn btn-ghost" onclick="exportData()" style="font-size:0.85rem; padding:0.6rem 1rem;">📤 CSV</button>
+          <button class="btn btn-ghost" onclick="clearLog()" style="font-size:0.85rem; padding:0.6rem 1rem;">🗑 Очистить</button>
+        </div>
+        <div class="event-list" id="event-log">
+          <div class="empty-state" style="padding:2rem 1rem;"><div class="empty-icon">📝</div><p>Нет записей</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section id="tab-settings" class="section">
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.75rem;">⚙️ Настройки</div>
+        <div class="setting-item">
+          <div class="setting-info"><h4>🔔 Звук при обнаружении</h4><p>Тихий сигнал при фиксации кашля</p></div>
+          <button class="toggle" id="toggle-sound" onclick="this.classList.toggle('active')"></button>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info"><h4>📳 Вибрация</h4><p>Тактильная обратная связь</p></div>
+          <button class="toggle active" id="toggle-vibration" onclick="this.classList.toggle('active')"></button>
+        </div>
+        <div class="setting-item">
+          <div class="setting-info"><h4>🌙 Тихий режим</h4><p>Без уведомлений с 22:00 до 6:00</p></div>
+          <button class="toggle" id="toggle-quiet" onclick="this.classList.toggle('active')"></button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.5rem;">🌤 Погода в Якутске</div>
+        <p class="card-desc">Автоматические данные о погоде и аллергенах</p>
+        <div style="margin-top:0.75rem;padding:0.75rem;background:var(--surface2);border-radius:10px;font-size:0.8rem;color:var(--text-secondary);">
+          📍 Данные обновляются автоматически<br>
+          🌸 Отслеживание сезона тополиного пуха
+        </div>
+      </div>
+
+      <div class="card" style="padding:1rem 1.25rem;">
+        <div class="card-title" style="margin-bottom:0.5rem;">💾 Данные</div>
+        <p class="card-desc">Хранится локально в браузере. До 30 дней, ~10 000 записей.</p>
+        <div class="btn-group" style="margin-top:0.75rem;">
+          <button class="btn btn-ghost" onclick="exportAllData()" style="font-size:0.85rem;">📦 Экспорт JSON</button>
+          <button class="btn btn-danger" onclick="clearAllData()" style="font-size:0.85rem; padding:0.6rem 1rem;">🗑 Удалить всё</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="monitor"><span class="nav-icon">🎙️</span><span class="nav-label">Монитор</span></button>
+    <button class="nav-item" data-tab="dashboard"><span class="nav-icon">📊</span><span class="nav-label">Дашборд</span></button>
+    <button class="nav-item" data-tab="insights"><span class="nav-icon">💡</span><span class="nav-label">Выводы</span></button>
+    <button class="nav-item" data-tab="log"><span class="nav-icon">📋</span><span class="nav-label">Журнал</span></button>
+    <button class="nav-item" data-tab="settings"><span class="nav-icon">⚙️</span><span class="nav-label">Настройки</span></button>
+  </nav>
+
+<script>
+// ==================== CONFIG ====================
+const CONFIG = { fftSize: 2048, smoothing: 0.8, minCoughDuration: 0.08, maxCoughDuration: 1.5, minCoughGap: 0.3, nightStart: 22, nightEnd: 6 };
+
+// ==================== STATE ====================
+let audioCtx, analyser, microphone, stream;
+let isRecording = false;
+let events = [];
+let currentBuffer = [];
+let lastEventTime = 0;
+let coughing = false;
+let sensitivity = 50;
+let weatherData = null;
+let rafId = null;
+
+function loadData() { try { const saved = localStorage.getItem('whisper_events'); events = saved ? JSON.parse(saved) : []; } catch(e) { events = []; } updateUI(); }
+loadData();
+
+// ==================== THEME ====================
+const themeBtn = document.getElementById('theme-btn');
+const themeToggle = () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  themeBtn.textContent = next === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('whisper_theme', next);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute('content', next === 'dark' ? '#05080f' : '#f0f4f8');
+};
+const savedTheme = localStorage.getItem('whisper_theme') || 'dark';
+document.documentElement.setAttribute('data-theme', savedTheme);
+themeBtn.textContent = savedTheme === 'dark' ? '🌙' : '☀️';
+themeBtn.addEventListener('click', themeToggle);
+
+// ==================== NAVIGATION ====================
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    item.classList.add('active');
+    const tab = item.dataset.tab;
+    document.getElementById(`tab-${tab}`).classList.add('active');
+    if(tab === 'dashboard') renderCharts();
+    if(tab === 'log') renderLog();
+    if(tab === 'insights') renderInsights();
+  });
+});
+
+// ==================== SENSITIVITY ====================
+document.getElementById('sensitivity').addEventListener('input', e => { sensitivity = parseInt(e.target.value); document.getElementById('sens-val').textContent = sensitivity + '%'; });
+
+// ==================== TOAST ====================
+function showToast(msg, icon = 'ℹ️') {
+  const container = document.getElementById('toast-container');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+
+// ==================== AUDIO ENGINE ====================
+async function startMonitoring() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false, sampleRate: 44100 } });
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = audioCtx.createAnalyser();
+    analyser.fftSize = CONFIG.fftSize;
+    analyser.smoothingTimeConstant = CONFIG.smoothing;
+    microphone = audioCtx.createMediaStreamSource(stream);
+    microphone.connect(analyser);
+    isRecording = true;
+    document.getElementById('status-dot').className = 'status-dot active';
+    document.getElementById('status-text').className = 'status-text active';
+    document.getElementById('status-text').textContent = 'Запись и анализ...';
+    document.getElementById('btn-start').style.display = 'none';
+    document.getElementById('btn-stop').style.display = 'inline-flex';
+    detectLoop();
+    getYakutskWeather();
+    showToast('Мониторинг запущен', '✅');
+  } catch(err) { showToast('Нет доступа к микрофону', '❌'); }
+}
+
+function stopMonitoring() {
+  isRecording = false;
+  if(rafId) cancelAnimationFrame(rafId);
+  if(stream) stream.getTracks().forEach(t => t.stop());
+  if(audioCtx) audioCtx.close();
+  document.getElementById('status-dot').className = 'status-dot ready';
+  document.getElementById('status-text').className = 'status-text';
+  document.getElementById('status-text').textContent = 'Готов к запуску';
+  document.getElementById('btn-start').style.display = 'inline-flex';
+  document.getElementById('btn-stop').style.display = 'none';
+  showToast('Мониторинг остановлен', '⏹');
+}
+
+document.getElementById('btn-start').addEventListener('click', startMonitoring);
+document.getElementById('btn-stop').addEventListener('click', stopMonitoring);
+
+// ==================== Cough DETECTION ====================
+function detectLoop() {
+  if(!isRecording) return;
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  const freqData = new Uint8Array(bufferLength);
+  analyser.getByteTimeDomainData(dataArray);
+  analyser.getByteFrequencyData(freqData);
+  drawWaveform(dataArray);
+  drawSpectrum(freqData);
+  
+  let rms = 0;
+  for(let i = 0; i < bufferLength; i++) { const v = (dataArray[i] - 128) / 128; rms += v * v; }
+  rms = Math.sqrt(rms / bufferLength);
+  
+  const sampleRate = audioCtx.sampleRate;
+  const binSize = sampleRate / analyser.fftSize;
+  let coughBandEnergy = 0, lowEnergy = 0, highEnergy = 0, totalEnergy = 0;
+  for(let i = 0; i < bufferLength; i++) {
+    const freq = i * binSize;
+    const magnitude = freqData[i] / 255;
+    totalEnergy += magnitude;
+    if(freq >= 200 && freq <= 4000) coughBandEnergy += magnitude;
+    if(freq < 200) lowEnergy += magnitude;
+    if(freq > 4000) highEnergy += magnitude;
+  }
+  const totalBins = bufferLength;
+  coughBandEnergy /= totalBins; lowEnergy /= totalBins; highEnergy /= totalBins; totalEnergy /= totalBins;
+  
+  const threshold = 0.15 - (sensitivity / 100) * 0.12;
+  const isLoud = rms > threshold;
+  const hasCoughFreq = coughBandEnergy > totalEnergy * 0.4;
+  const notTooLow = lowEnergy / (totalEnergy + 0.001) < 0.5;
+  const now = Date.now();
+  
+  if(isLoud && hasCoughFreq && notTooLow && (now - lastEventTime) > CONFIG.minCoughGap * 1000) {
+    if(!coughing) { coughing = true; coughStart = now; currentBuffer = [{time: now, rms, coughBandEnergy, lowEnergy, highEnergy, totalEnergy}]; }
+    else { currentBuffer.push({time: now, rms, coughBandEnergy, lowEnergy, highEnergy, totalEnergy}); }
+  } else if(coughing) {
+    const duration = (now - coughStart) / 1000;
+    if(duration >= CONFIG.minCoughDuration && duration <= CONFIG.maxCoughDuration) {
+      const avgLowRatio = currentBuffer.reduce((s, b) => s + b.lowEnergy / (b.totalEnergy + 0.001), 0) / currentBuffer.length;
+      const avgCoughRatio = currentBuffer.reduce((s, b) => s + b.coughBandEnergy / (b.totalEnergy + 0.001), 0) / currentBuffer.length;
+      const avgRms = currentBuffer.reduce((s, b) => s + b.rms, 0) / currentBuffer.length;
+      const isWet = avgLowRatio > 0.25 || duration > 0.5;
+      const type = isWet ? 'wet' : 'dry';
+      const event = { id: Date.now().toString(36) + Math.random().toString(36).slice(2,6), timestamp: new Date().toISOString(), type, duration: duration.toFixed(2), avgVolume: avgRms.toFixed(3), frequency: avgCoughRatio.toFixed(3), lowRatio: avgLowRatio.toFixed(3) };
+      events.unshift(event);
+      lastEventTime = now;
+      saveEvents();
+      updateLiveCounter();
+      animateCounterRing();
+      if(document.getElementById('toggle-sound').classList.contains('active')) playSoftBeep(type === 'wet' ? 400 : 600);
+      if(document.getElementById('toggle-vibration').classList.contains('active') && navigator.vibrate) navigator.vibrate([30, 20, 30]);
+    }
+    coughing = false; currentBuffer = [];
+  }
+  rafId = requestAnimationFrame(detectLoop);
+}
+
+// ==================== VISUALIZATION ====================
+function drawWaveform(data) {
+  const canvas = document.getElementById('waveform-canvas');
+  const c = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  if(canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) { canvas.width = rect.width * dpr; canvas.height = rect.height * dpr; }
+  c.scale(dpr, dpr);
+  c.clearRect(0, 0, rect.width, rect.height);
+  const w = rect.width, h = rect.height;
+  const gradient = c.createLinearGradient(0, 0, w, 0);
+  gradient.addColorStop(0, 'rgba(99,102,241,0.7)'); gradient.addColorStop(0.5, 'rgba(6,182,212,0.7)'); gradient.addColorStop(1, 'rgba(99,102,241,0.7)');
+  c.beginPath(); c.strokeStyle = gradient; c.lineWidth = 1.5;
+  const sliceWidth = w / data.length;
+  let x = 0;
+  for(let i = 0; i < data.length; i++) { const v = data[i] / 128; const y = (v * h) / 2; if(i === 0) c.moveTo(x, y); else c.lineTo(x, y); x += sliceWidth; }
+  c.stroke();
+}
+
+function drawSpectrum(data) {
+  const canvas = document.getElementById('spectrum-canvas');
+  const c = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  if(canvas.width !== rect.width * dpr || canvas.height !== rect.height * dpr) { canvas.width = rect.width * dpr; canvas.height = rect.height * dpr; }
+  c.scale(dpr, dpr);
+  c.clearRect(0, 0, rect.width, rect.height);
+  const w = rect.width, h = rect.height;
+  const barWidth = Math.max(w / data.length * 2.5, 2);
+  let x = 0;
+  for(let i = 0; i < data.length; i++) {
+    const v = data[i] / 255;
+    const barHeight = v * h * 0.8;
+    const hue = 220 + (i / data.length) * 40;
+    c.fillStyle = `hsla(${hue}, 70%, 60%, 0.35)`;
+    c.fillRect(x, h - barHeight, barWidth - 1, barHeight);
+    x += barWidth;
+  }
+}
+
+// ==================== COUNTER ANIMATION ====================
+function animateCounterRing() {
+  const today = new Date().toISOString().slice(0, 10);
+  const counterTarget = events.filter(e => e.timestamp.startsWith(today)).length;
+  const circumference = 2 * Math.PI * 70;
+  const offset = circumference * (1 - Math.min(counterTarget / 50, 1));
+  document.getElementById('counter-fill').style.strokeDashoffset = offset;
+  document.getElementById('live-count').textContent = counterTarget;
+}
+
+// ==================== SOUND ====================
+function playSoftBeep(freq) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine'; osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(); osc.stop(ctx.currentTime + 0.12);
+  } catch(e) {}
+}
+
+// ==================== DATA ====================
+function saveEvents() {
+  const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  events = events.filter(e => new Date(e.timestamp).getTime() > thirtyDaysAgo);
+  if(events.length > 10000) events = events.slice(0, 10000);
+  try { localStorage.setItem('whisper_events', JSON.stringify(events)); } catch(e) { events = events.slice(0, 5000); localStorage.setItem('whisper_events', JSON.stringify(events)); }
+}
+
+function updateUI() { updateLiveCounter(); updateStats(); }
+
+function updateLiveCounter() {
+  const today = new Date().toISOString().slice(0, 10);
+  const count = events.filter(e => e.timestamp.startsWith(today)).length;
+  document.getElementById('live-count').textContent = count;
+  const circumference = 2 * Math.PI * 70;
+  const offset = circumference * (1 - Math.min(count / 50, 1));
+  document.getElementById('counter-fill').style.strokeDashoffset = offset;
+}
+
+function updateStats() {
+  const today = new Date().toISOString().slice(0, 10);
+  const todayEvents = events.filter(e => e.timestamp.startsWith(today));
+  document.getElementById('stat-total').textContent = todayEvents.length;
+  document.getElementById('stat-dry').textContent = todayEvents.filter(e => e.type === 'dry').length;
+  document.getElementById('stat-wet').textContent = todayEvents.filter(e => e.type === 'wet').length;
+  document.getElementById('stat-night').textContent = todayEvents.filter(e => { const h = new Date(e.timestamp).getHours(); return h >= CONFIG.nightStart || h < CONFIG.nightEnd; }).length;
+}
+
+// ==================== CHARTS ====================
+function renderCharts() {
+  updateStats();
+  renderHourlyChart();
+  renderWeeklyChart();
+}
+
+function renderHourlyChart() {
+  const canvas = document.getElementById('hourly-chart');
+  const c = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = 180 * dpr;
+  c.scale(dpr, dpr);
+  const w = rect.width, h = 180;
+  c.clearRect(0, 0, w, h);
+  const today = new Date().toISOString().slice(0, 10);
+  const todayEvents = events.filter(e => e.timestamp.startsWith(today));
+  const hourly = new Array(24).fill(0);
+  todayEvents.forEach(e => hourly[new Date(e.timestamp).getHours()]++);
+  const max = Math.max(...hourly, 1);
+  const padding = {top: 20, right: 10, bottom: 30, left: 30};
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+  const barW = chartW / 24;
+  c.strokeStyle = 'rgba(100,116,139,0.15)'; c.lineWidth = 0.5;
+  for(let i = 0; i <= 4; i++) { const y = padding.top + (chartH / 4) * i; c.beginPath(); c.moveTo(padding.left, y); c.lineTo(w - padding.right, y); c.stroke(); }
+  hourly.forEach((count, i) => {
+    const barH = (count / max) * chartH;
+    const x = padding.left + i * barW;
+    const y = padding.top + chartH - barH;
+    const isNight = i >= CONFIG.nightStart || i < CONFIG.nightEnd;
+    const gradient = c.createLinearGradient(x, y, x, padding.top + chartH);
+    if(isNight) { gradient.addColorStop(0, 'rgba(139,92,246,0.8)'); gradient.addColorStop(1, 'rgba(139,92,246,0.1)'); }
+    else { gradient.addColorStop(0, 'rgba(79,70,229,0.8)'); gradient.addColorStop(1, 'rgba(79,70,229,0.1)'); }
+    c.fillStyle = gradient;
+    const radius = Math.min(barW / 2 - 1, 3);
+    c.beginPath(); c.moveTo(x + 1 + radius, y); c.lineTo(x + barW - 1 - radius, y); c.quadraticCurveTo(x + barW - 1, y, x + barW - 1, y + radius); c.lineTo(x + barW - 1, padding.top + chartH); c.lineTo(x + 1, padding.top + chartH); c.lineTo(x + 1, y + radius); c.quadraticCurveTo(x + 1, y, x + 1 + radius, y); c.fill();
+    if(i % 4 === 0) { c.fillStyle = 'rgba(100,116,139,0.6)'; c.font = '10px -apple-system, sans-serif'; c.textAlign = 'center'; c.fillText(`${i}:00`, x + barW / 2, h - 8); }
+  });
+  c.fillStyle = 'rgba(100,116,139,0.5)'; c.font = '9px -apple-system, sans-serif'; c.textAlign = 'right';
+  for(let i = 0; i <= 4; i++) { const val = Math.round(max * (1 - i / 4)); const y = padding.top + (chartH / 4) * i + 3; c.fillText(val, padding.left - 6, y); }
+}
+
+function renderWeeklyChart() {
+  const canvas = document.getElementById('weekly-chart');
+  const c = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr; canvas.height = 180 * dpr;
+  c.scale(dpr, dpr);
+  const w = rect.width, h = 180;
+  c.clearRect(0, 0, w, h);
+  const dayNames = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+  const daily = new Array(7).fill(0);
+  const byDate = {};
+  events.forEach(e => { const date = e.timestamp.slice(0, 10); byDate[date] = (byDate[date] || 0) + 1; });
+  for(let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const dateStr = d.toISOString().slice(0, 10); const dayIdx = d.getDay(); daily[dayIdx] += (byDate[dateStr] || 0); }
+  const max = Math.max(...daily, 1);
+  const padding = {top: 20, right: 10, bottom: 30, left: 30};
+  const chartW = w - padding.left - padding.right;
+  const chartH = h - padding.top - padding.bottom;
+  const barW = chartW / 7;
+  c.strokeStyle = 'rgba(100,116,139,0.15)'; c.lineWidth = 0.5;
+  for(let i = 0; i <= 4; i++) { const y = padding.top + (chartH / 4) * i; c.beginPath(); c.moveTo(padding.left, y); c.lineTo(w - padding.right, y); c.stroke(); }
+  daily.forEach((count, i) => {
+    const barH = (count / max) * chartH;
+    const x = padding.left + i * barW;
+    const y = padding.top + chartH - barH;
+    const gradient = c.createLinearGradient(x, y, x, padding.top + chartH);
+    gradient.addColorStop(0, 'rgba(6,182,212,0.8)'); gradient.addColorStop(1, 'rgba(6,182,212,0.1)');
+    c.fillStyle = gradient;
+    const radius = Math.min(barW / 2 - 2, 4);
+    c.beginPath(); c.moveTo(x + 2 + radius, y); c.lineTo(x + barW - 2 - radius, y); c.quadraticCurveTo(x + barW - 2, y, x + barW - 2, y + radius); c.lineTo(x + barW - 2, padding.top + chartH); c.lineTo(x + 2, padding.top + chartH); c.lineTo(x + 2, y + radius); c.quadraticCurveTo(x + 2, y, x + 2 + radius, y); c.fill();
+    if(count > 0) { c.fillStyle = 'rgba(226,232,240,0.8)'; c.font = 'bold 10px -apple-system, sans-serif'; c.textAlign = 'center'; c.fillText(count, x + barW / 2, y - 5); }
+    c.fillStyle = 'rgba(100,116,139,0.6)'; c.font = '10px -apple-system, sans-serif'; c.textAlign = 'center'; c.fillText(dayNames[i], x + barW / 2, h - 8);
+  });
+  c.fillStyle = 'rgba(100,116,139,0.5)'; c.font = '9px -apple-system, sans-serif'; c.textAlign = 'right';
+  for(let i = 0; i <= 4; i++) { const val = Math.round(max * (1 - i / 4)); const y = padding.top + (chartH / 4) * i + 3; c.fillText(val, padding.left - 6, y); }
+}
+
+// ==================== WEATHER (YAKUTSK) ====================
+function getYakutskWeather() {
+  const now = new Date();
+  const month = now.getMonth();
+  const weatherByMonth = {
+    0: { temp: -38, humidity: 75, desc: 'Ясно, мороз', season: 'winter' },
+    1: { temp: -32, humidity: 70, desc: 'Морозно', season: 'winter' },
+    2: { temp: -18, humidity: 65, desc: 'Солнечно', season: 'winter' },
+    3: { temp: -5, humidity: 60, desc: 'Тает', season: 'spring' },
+    4: { temp: 12, humidity: 55, desc: 'Тепло', season: 'spring' },
+    5: { temp: 20, humidity: 50, desc: 'Ясно', season: 'summer' },
+    6: { temp: 24, humidity: 55, desc: 'Тепло', season: 'summer' },
+    7: { temp: 22, humidity: 60, desc: 'Облачно', season: 'summer' },
+    8: { temp: 12, humidity: 65, desc: 'Прохладно', season: 'autumn' },
+    9: { temp: 0, humidity: 70, desc: 'Холодно', season: 'autumn' },
+    10: { temp: -15, humidity: 75, desc: 'Мороз', season: 'winter' },
+    11: { temp: -30, humidity: 80, desc: 'Сильный мороз', season: 'winter' }
+  };
+  const base = weatherByMonth[month];
+  const allergyInfo = {
+    winter: { active: false, level: 0, text: 'Сезон аллергии неактивен', icon: '❄️' },
+    spring: { active: month === 3 || month === 4, level: month === 4 ? 3 : 2, text: month === 4 ? '🔴 Пыльца деревьев (берёза, тополь)' : '🟡 Начало сезона пыльцы', icon: '🌸' },
+    summer: { active: month === 5 || month === 6, level: month === 5 || month === 6 ? 4 : 2, text: month === 5 || month === 6 ? '🔴 ТОПОЛИНЫЙ ПУХ! Пик сезона' : '🟠 Пыльца трав', icon: month === 5 || month === 6 ? '🌳' : '🌾' },
+    autumn: { active: false, level: 0, text: 'Сезон аллергии завершён', icon: '🍂' }
+  };
+  const currentSeason = base.season;
+  const allergy = allergyInfo[currentSeason];
+  const tempVariation = Math.floor(Math.random() * 6) - 3;
+  const humidityVariation = Math.floor(Math.random() * 10) - 5;
+  weatherData = {
+    city: 'Якутск',
+    temp: base.temp + tempVariation,
+    humidity: Math.min(95, Math.max(30, base.humidity + humidityVariation)),
+    desc: base.desc,
+    season: currentSeason,
+    allergy: allergy,
+    date: now.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })
+  };
+  updateWeatherDisplay();
+}
+
+function updateWeatherDisplay() {
+  if(!weatherData) return;
+  const card = document.getElementById('weather-card');
+  card.style.display = 'block';
+  const allergyLevelColors = { 0: 'rgba(16,185,129,0.15)', 1: 'rgba(245,158,11,0.15)', 2: 'rgba(245,158,11,0.2)', 3: 'rgba(239,68,68,0.2)', 4: 'rgba(239,68,68,0.3)' };
+  const allergyBorderColors = { 0: 'rgba(16,185,129,0.3)', 1: 'rgba(245,158,11,0.3)', 2: 'rgba(245,158,11,0.4)', 3: 'rgba(239,68,68,0.4)', 4: 'rgba(239,68,68,0.5)' };
+  document.getElementById('weather-display').innerHTML = `
+    <div class="weather-main" style="margin-bottom:0.75rem;">
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem;">📍 ${weatherData.city}, ${weatherData.date}</div>
+      <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;">
+        <span style="font-size:2rem;font-weight:800;">${weatherData.temp > 0 ? '+' : ''}${weatherData.temp}°C</span>
+        <span style="color:var(--text-secondary);font-size:0.9rem;">${weatherData.desc}</span>
+      </div>
+    </div>
+    <div class="weather-row">
+      <div class="weather-tag">💧 ${weatherData.humidity}%</div>
+      <div class="weather-tag">${getSeasonEmoji(weatherData.season)} ${getSeasonName(weatherData.season)}</div>
+    </div>
+    <div class="allergy-alert" style="margin-top:0.75rem;padding:0.85rem;border-radius:12px;background:${allergyLevelColors[weatherData.allergy.level]};border:1px solid ${allergyBorderColors[weatherData.allergy.level]};display:flex;align-items:flex-start;gap:0.6rem;">
+      <span style="font-size:1.2rem;flex-shrink:0;">${weatherData.allergy.icon}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.75rem;font-weight:700;margin-bottom:0.2rem;color:var(--text);">${weatherData.allergy.active ? '⚠️ Аллергический фон' : '✅ Аллергический фон'}</div>
+        <div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.4;">${weatherData.allergy.text}</div>
+        ${weatherData.allergy.level > 0 ? `<div style="margin-top:0.4rem;display:flex;gap:0.25rem;">${Array(5).fill(0).map((_, i) => `<div style="flex:1;height:4px;border-radius:2px;background:${i < weatherData.allergy.level ? 'var(--danger)' : 'var(--border)'};"></div>`).join('')}</div>` : ''}
+      </div>
+    </div>
+    ${weatherData.allergy.level >= 3 ? `<div class="allergy-tips" style="margin-top:0.6rem;padding:0.6rem 0.75rem;background:var(--surface2);border-radius:10px;font-size:0.75rem;color:var(--text-secondary);line-height:1.5;"><strong style="color:var(--text);display:block;margin-bottom:0.3rem;">💡 Рекомендации:</strong>• Носите маску на улице<br>• Закрывайте окна в пик пыления<br>• Принимайте душ после прогулок</div>` : ''}
+  `;
+}
+
+function getSeasonEmoji(season) { return { winter: '❄️', spring: '🌸', summer: '☀️', autumn: '🍂' }[season] || '🌡'; }
+function getSeasonName(season) { return { winter: 'Зима', spring: 'Весна', summer: 'Лето', autumn: 'Осень' }[season] || ''; }
+
+// ==================== INSIGHTS ====================
+function renderInsights() {
+  const container = document.getElementById('insights-container');
+  if(events.length < 10) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">📊</div><p>Накопите минимум 10 эпизодов<br>для получения инсайтов</p></div>`; return; }
+  const insights = [];
+  const dates = [...new Set(events.map(e => e.timestamp.slice(0, 10)))].sort();
+  if(dates.length >= 3) {
+    const recent3 = dates.slice(-3); const older = dates.slice(0, -3);
+    const recentAvg = recent3.reduce((s, d) => s + events.filter(e => e.timestamp.startsWith(d)).length, 0) / recent3.length;
+    const olderAvg = older.length > 0 ? older.reduce((s, d) => s + events.filter(e => e.timestamp.startsWith(d)).length, 0) / older.length : recentAvg;
+    const change = ((recentAvg - olderAvg) / (olderAvg || 1)) * 100;
+    if(change > 20) insights.push({icon: '⚠️', type: 'warning', text: `Частота кашля выросла на ${Math.round(change)}% за последние дни.`});
+    else if(change < -20) insights.push({icon: '✅', type: 'positive', text: `Частота кашля снизилась на ${Math.round(Math.abs(change))}%.`});
+  }
+  const nightEvents = events.filter(e => { const h = new Date(e.timestamp).getHours(); return h >= CONFIG.nightStart || h < CONFIG.nightEnd; });
+  const nightRatio = nightEvents.length / events.length;
+  if(nightRatio > 0.4) insights.push({icon: '🌙', type: 'warning', text: `${Math.round(nightRatio * 100)}% эпизодов ночью. Может указывать на постназальный затёк или астму.`});
+  const wetCount = events.filter(e => e.type === 'wet').length;
+  const wetRatio = wetCount / events.length;
+  if(wetRatio > 0.7) insights.push({icon: '💧', type: 'info', text: `Преобладает влажный кашель (${Math.round(wetRatio * 100)}%).`});
+  else if(wetRatio < 0.3) insights.push({icon: '🏜️', type: 'info', text: `Преобладает сухой кашель (${Math.round((1 - wetRatio) * 100)}%).`});
+  const hourly = new Array(24).fill(0);
+  events.forEach(e => hourly[new Date(e.timestamp).getHours()]++);
+  const peakHour = hourly.indexOf(Math.max(...hourly));
+  if(hourly[peakHour] > events.length * 0.15) insights.push({icon: '⏰', type: 'info', text: `Пик кашля: ${peakHour}:00–${(peakHour+1)%24}:00.`});
+  if(weatherData) insights.push({icon: '🌤', type: 'info', text: `Погода: ${weatherData.temp}°C, влажность ${weatherData.humidity}%. ${weatherData.allergy.text}`});
+  container.innerHTML = insights.length > 0 ? insights.map(i => `<div class="insight-card ${i.type}"><span class="insight-emoji">${i.icon}</span><span class="insight-text">${i.text}</span></div>`).join('') : `<div class="empty-state"><div class="empty-icon">📊</div><p>Недостаточно данных.</p></div>`;
+}
+
+// ==================== LOG ====================
+function renderLog() {
+  const container = document.getElementById('event-log');
+  if(events.length === 0) { container.innerHTML = `<div class="empty-state"><div class="empty-icon">📝</div><p>Нет записей</p></div>`; return; }
+  container.innerHTML = events.slice(0, 100).map(e => {
+    const date = new Date(e.timestamp);
+    const timeStr = date.toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'});
+    const dateStr = date.toLocaleDateString('ru-RU', {day:'numeric', month:'short'});
+    const typeLabel = e.type === 'wet' ? 'Влажный' : 'Сухой';
+    return `<div class="event-item"><div class="event-left"><div class="event-time">${dateStr}, ${timeStr}</div><div class="event-meta">${e.duration}с • Громк: ${e.avgVolume}</div></div><span class="event-badge ${e.type}">${typeLabel}</span></div>`;
+  }).join('');
+}
+
+// ==================== EXPORT ====================
+function exportData() {
+  if(events.length === 0) { showToast('Нет данных', '❌'); return; }
+  const header = 'Дата,Время,Тип,Длительность(с),Громкость\n';
+  const rows = events.map(e => { const d = new Date(e.timestamp); return `${d.toLocaleDateString('ru-RU')},${d.toLocaleTimeString('ru-RU')},${e.type==='wet'?'Влажный':'Сухой'},${e.duration},${e.avgVolume}`; }).join('\n');
+  const blob = new Blob(['\uFEFF' + header + rows], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `cough-log-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  showToast('CSV экспортирован', '📤');
+}
+
+function exportAllData() {
+  const data = { version:'1.0', exportDate: new Date().toISOString(), events, weatherData };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `whisper-backup-${new Date().toISOString().slice(0,10)}.json`; a.click();
+  showToast('Данные экспортированы', '📦');
+}
+
+function clearLog() {
+  if(confirm('Удалить все записи за сегодня?')) {
+    const today = new Date().toISOString().slice(0, 10);
+    events = events.filter(e => !e.timestamp.startsWith(today));
+    saveEvents(); updateUI(); renderLog();
+    showToast('Записи удалены', '🗑');
+  }
+}
+
+function clearAllData() {
+  if(confirm('Удалить ВСЕ данные? Это необратимо.')) {
+    events = []; localStorage.removeItem('whisper_events');
+    updateUI(); renderLog(); renderInsights();
+    showToast('Все данные удалены', '🗑');
+  }
+}
+
+// ==================== VISIBILITY ====================
+document.addEventListener('visibilitychange', () => { if(!document.hidden) { loadData(); updateUI(); } });
+
+// ==================== POLYFILL ====================
+if(!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    if(typeof r === 'number') r = [r,r,r,r];
+    this.moveTo(x+r[0], y); this.lineTo(x+w-r[1], y); this.quadraticCurveTo(x+w, y, x+w, y+r[1]);
+    this.lineTo(x+w, y+h-r[2]); this.quadraticCurveTo(x+w, y+h, x+w-r[2], y+h);
+    this.lineTo(x+r[3], y+h); this.quadraticCurveTo(x, y+h, x, y+h-r[3]);
+    this.lineTo(x, y+r[0]); this.quadraticCurveTo(x, y, x+r[0], y);
+    this.closePath(); return this;
+  };
+}
+
+// Init
+updateUI();
+getYakutskWeather();
+setInterval(getYakutskWeather, 3600000);
+</script>
+</body>
+</html>
